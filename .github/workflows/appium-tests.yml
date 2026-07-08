@@ -1,0 +1,46 @@
+name: Appium E2E Testing
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  appium-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: 'Sai giresh app/app/appium-test/package-lock.json'
+
+      - name: Install Appium & Dependencies
+        run: |
+          cd "Sai giresh app/app/appium-test"
+          npm ci
+
+      - name: Generate E2E Test Cases Excel Sheet
+        run: |
+          cd "Sai giresh app/app/appium-test"
+          npm run generate-excel
+
+      - name: Run Appium Tests (Dry Run / Verification)
+        run: |
+          echo "Starting Appium Server..."
+          npx appium &
+          sleep 5
+          echo "Appium tests would normally be executed here on a real device/emulator using: npm test"
+
+      - name: Upload Appium Excel Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Appium-E2E-Test-Cases
+          path: Sai giresh app/app/appium-test/Appium_E2E_TestCases.xlsx

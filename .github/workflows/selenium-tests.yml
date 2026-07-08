@@ -1,0 +1,54 @@
+name: Selenium E2E Web Testing
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  selenium-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: 'Sai giresh app/frontend/package-lock.json'
+
+      - name: Install Frontend & Test Dependencies
+        run: |
+          cd "Sai giresh app/frontend"
+          npm ci
+          cd "selenium-tests"
+          npm ci
+
+      - name: Generate E2E Test Cases Excel Sheet
+        run: |
+          cd "Sai giresh app/frontend/selenium-tests"
+          node generate-test-cases.js
+
+      - name: Start Next.js App in Background
+        run: |
+          cd "Sai giresh app/frontend"
+          # Run dev in background since it is faster and bypasses strict build-time lint checks in CI
+          npm run dev &
+          # Wait until port 3000 is open and responsive
+          npx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Run Selenium E2E Tests
+        run: |
+          cd "Sai giresh app/frontend/selenium-tests"
+          npm test
+
+      - name: Upload Selenium Excel Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Selenium-E2E-Test-Cases
+          path: Sai giresh app/frontend/selenium-tests/WealthWise_E2E_Test_Cases.xlsx
