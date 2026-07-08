@@ -1,0 +1,16 @@
+{
+  "name": "wealthwise-selenium-tests",
+  "version": "1.0.0",
+  "description": "End-to-End Selenium Testing Suite for WealthWise Web Frontend",
+  "main": "tests/login.test.js",
+  "scripts": {
+    "test": "mocha tests/**/*.test.js --timeout 30000 --exit"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "selenium-webdriver": "^4.18.1"
+  },
+  "devDependencies": {
+    "mocha": "^10.3.0"
+  }
+}

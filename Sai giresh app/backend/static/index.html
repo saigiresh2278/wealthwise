@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WealthWise AI - Financial Advisor Agent</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z" fill="#ffffff"/>
+          </svg>
+        </div>
+        <div>
+          <h1>WealthWise AI</h1>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">Antigravity Agent Platform</p>
+        </div>
+      </div>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span>Agent Online</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left Sidebar: Financial Profile and Custom Context -->
+    <div class="sidebar-panel">
+      <!-- Quick Dashboard Stats -->
+      <div class="glass-card">
+        <div class="card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          Quick Financial Indicators
+        </div>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">Savings Rate</div>
+            <div class="stat-value savings" id="indicator-savings-rate">25%</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Expense Ratio</div>
+            <div class="stat-value expenses" id="indicator-expense-ratio">75%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial Profile Form -->
+      <div class="glass-card">
+        <div class="card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          User Profile Context
+        </div>
+        <form id="profile-form">
+          <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" class="form-control" value="Venkata Sai Giresh">
+          </div>
+          <div class="flex-row">
+            <div class="form-group">
+              <label for="age">Age</label>
+              <input type="number" id="age" class="form-control" value="23">
+            </div>
+            <div class="form-group">
+              <label for="occupation">Occupation</label>
+              <input type="text" id="occupation" class="form-control" value="Software Developer">
+            </div>
+          </div>
+          <div class="flex-row">
+            <div class="form-group">
+              <label for="monthlyIncome">Income (₹)</label>
+              <input type="number" id="monthlyIncome" class="form-control" value="80000" step="5000">
+            </div>
+            <div class="form-group">
+              <label for="monthlyExpenses">Expenses (₹)</label>
+              <input type="number" id="monthlyExpenses" class="form-control" value="55000" step="5000">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="riskComfort">Risk Comfort</label>
+            <select id="riskComfort" class="form-control">
+              <option value="Low">Low (Safety First)</option>
+              <option value="Medium" selected>Medium (Balanced)</option>
+              <option value="High">High (Aggressive Growth)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="mainFinancialGoal">Primary Goal</label>
+            <input type="text" id="mainFinancialGoal" class="form-control" value="Buy a house in 5 years">
+          </div>
+          <input type="hidden" id="investmentExperience" value="Intermediate">
+          <input type="hidden" id="email" value="sai@example.com">
+        </form>
+      </div>
+
+      <!-- Financial Goals -->
+      <div class="glass-card">
+        <div class="card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+          Active Goals
+        </div>
+        <div class="items-list" id="goals-list">
+          <!-- Dynamically populated -->
+        </div>
+        <button class="add-item-btn" id="add-goal-btn">+ Add Mock Goal</button>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="glass-card">
+        <div class="card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          Recent Transactions
+        </div>
+        <div class="items-list" id="txns-list">
+          <!-- Dynamically populated -->
+        </div>
+        <button class="add-item-btn" id="add-txn-btn">+ Add Mock Transaction</button>
+      </div>
+    </div>
+
+    <!-- Right Content: Premium Chat Panel -->
+    <div class="glass-card chat-panel">
+      <div class="card-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-color);"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        AI Advisor Consultation Room
+      </div>
+
+      <!-- Messages Window -->
+      <div class="chat-messages" id="chat-messages">
+        <div class="message bot">
+          <div class="avatar">AI</div>
+          <div class="message-bubble">
+            <p>Welcome! I am your <strong>WealthWise AI Financial Advisor</strong> powered by the Antigravity Agent framework.</p>
+            <p>I can access your profile, transaction details, and goals to provide personalized financial guidance. Ask me questions like:</p>
+            <ul>
+              <li>"Analyze my budget and give me advice"</li>
+              <li>"Is my home-buying goal achievable based on my current income and savings?"</li>
+              <li>"Recommend investments matching my risk tolerance"</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Input and Controls -->
+      <div class="chat-input-area">
+        <div class="suggested-prompts">
+          <button class="prompt-btn" data-prompt="Analyze my budget and give me advice.">📊 Budget Analysis</button>
+          <button class="prompt-btn" data-prompt="Is my goal of buying a house achievable?">🏠 Goal Feasibility</button>
+          <button class="prompt-btn" data-prompt="Suggest an investment portfolio recommendation.">📈 Investment Portfolio</button>
+          <button class="prompt-btn" data-prompt="How can I optimize my savings rate?">💡 Optimize Savings</button>
+        </div>
+        <div class="input-wrapper">
+          <input type="text" id="chat-input" class="chat-input" placeholder="Type your message to the financial advisor agent..." autocomplete="off">
+          <button id="send-btn" class="send-btn">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

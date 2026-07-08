@@ -1,0 +1,61 @@
+name: Web Frontend CI & E2E Testing
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            frontend/package-lock.json
+            frontend/selenium-tests/package-lock.json
+
+      # Step 1: Install Frontend Dependencies
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm install
+
+      # Step 2: Build Next.js Application (to verify compilation)
+      - name: Build Next.js Application
+        working-directory: frontend
+        run: npm run build
+
+      # Step 3: Install Selenium E2E Test Dependencies
+      - name: Install Selenium E2E Test Dependencies
+        working-directory: frontend/selenium-tests
+        run: npm install
+
+      # Step 4: Run Next.js App in Background & Execute E2E Selenium Tests
+      - name: Run Next.js App and Execute E2E Selenium Tests
+        working-directory: frontend
+        run: |
+          # Start Next.js dev server in the background
+          npm run dev &
+          
+          # Wait for the dev server to start on port 3000
+          npx wait-on http://localhost:3000/login --timeout 60000
+          
+          # Navigate to selenium-tests folder and run tests
+          cd selenium-tests
+          npm run test
+
+      # Step 5: Upload E2E Test Cases Excel Sheet as Workflow Artifact
+      - name: Upload Test Cases Excel Spreadsheet
+        uses: actions/upload-artifact@v4
+        with:
+          name: WealthWise_E2E_Test_Cases
+          path: frontend/selenium-tests/WealthWise_E2E_Test_Cases.xlsx
+          if-no-files-found: error
