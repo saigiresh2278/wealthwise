@@ -26,6 +26,10 @@ jobs:
         uses: browser-actions/setup-chrome@v1
         with:
           chrome-version: stable
+        id: setup-chrome
+
+      - name: Print Chrome version (for debugging)
+        run: google-chrome --version || chromium-browser --version || true
 
       - name: Install Frontend Dependencies
         run: |
@@ -54,6 +58,9 @@ jobs:
           cd "Sai giresh app/frontend/selenium-tests"
           npm test
         env:
+          # Selenium Manager auto-downloads the correct ChromeDriver
+          # by detecting the installed Chrome binary version
+          SE_AVOID_BROWSER_DOWNLOAD: "0"
           DISPLAY: ':99'
 
       - name: Upload Selenium Excel Report Artifact

@@ -1,9 +1,27 @@
 const { Builder, By, until } = require("selenium-webdriver");
 const chrome = require("selenium-webdriver/chrome");
+const path = require("path");
+const fs = require("fs");
 
 const BASE_URL = "http://localhost:3000";
 const DRIVER_TIMEOUT = 60000; // 60s for beforeAll
 const TEST_TIMEOUT   = 60000; // 60s per test
+
+// Detect Chrome binary across environments
+function getChromeBinary() {
+  const candidates = [
+    process.env.CHROME_PATH,
+    "/usr/bin/google-chrome",
+    "/usr/bin/google-chrome-stable",
+    "/usr/bin/chromium-browser",
+    "/usr/bin/chromium",
+    "/snap/bin/chromium",
+  ].filter(Boolean);
+  for (const p of candidates) {
+    if (fs.existsSync(p)) return p;
+  }
+  return null; // Let Selenium Manager auto-detect
+}
 
 describe("WealthWise AI - Selenium E2E", () => {
   let driver;
@@ -11,16 +29,24 @@ describe("WealthWise AI - Selenium E2E", () => {
   beforeAll(async () => {
     const options = new chrome.Options();
     options.addArguments(
-      "--headless=new",          // Modern headless mode
-      "--no-sandbox",            // Required in CI (runs as root)
-      "--disable-dev-shm-usage", // Overcome limited /dev/shm in Docker
-      "--disable-gpu",           // Needed in headless CI
-      "--window-size=1920,1080", // Set viewport
+      "--headless=new",
+      "--no-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--window-size=1920,1080",
       "--disable-extensions",
-      "--disable-software-rasterizer",
-      "--remote-debugging-port=9222"
+      "--disable-software-rasterizer"
     );
 
+    // Use detected Chrome binary so Selenium Manager picks the right driver
+    const chromeBinary = getChromeBinary();
+    if (chromeBinary) {
+      console.log(`Using Chrome binary: ${chromeBinary}`);
+      options.setChromeBinaryPath(chromeBinary);
+    }
+
+    // selenium-webdriver 4.11+ Selenium Manager auto-downloads
+    // the exact ChromeDriver version matching the Chrome binary
     driver = await new Builder()
       .forBrowser("chrome")
       .setChromeOptions(options)
