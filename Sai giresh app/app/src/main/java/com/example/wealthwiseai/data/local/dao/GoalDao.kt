@@ -20,4 +20,7 @@ interface GoalDao {
 
     @Query("DELETE FROM goals")
     suspend fun clearGoals()
+
+    @Query("SELECT * FROM goals ORDER BY targetAmount DESC")
+    fun getAllGoalsAdmin(): Flow<List<GoalEntity>>
 }

@@ -9,7 +9,7 @@ class AuthRepository(private val authDao: AuthDao) {
 
     suspend fun registerUser(fullName: String, email: String, password: String): Result<Unit> {
         return try {
-            val exists = authDao.userExists(email)
+            val exists = authDao.getUserByEmail(email) != null
             if (exists) {
                 Result.failure(Exception("Email already registered"))
             } else {
@@ -56,6 +56,35 @@ class AuthRepository(private val authDao: AuthDao) {
 
     suspend fun getUserByEmail(email: String): AuthEntity? {
         return authDao.getUserByEmail(email.trim().lowercase())
+    }
+
+    suspend fun authenticateOrRegisterGoogleUser(email: String, fullName: String): Result<AuthEntity> {
+        return try {
+            val trimmedEmail = email.trim().lowercase()
+            var user = authDao.getUserByEmail(trimmedEmail)
+            if (user == null) {
+                // Check if they are registered on the cloud
+                val cloudUser = FirebaseSyncHelper.fetchAuthUserDirect(trimmedEmail)
+                if (cloudUser != null) {
+                    authDao.insertUser(cloudUser)
+                    user = cloudUser
+                }
+            }
+            if (user == null) {
+                // Register a new Google OAuth user locally and on Firebase
+                val newUser = AuthEntity(
+                    email = trimmedEmail,
+                    fullName = fullName.trim(),
+                    passwordHash = "google_oauth"
+                )
+                authDao.insertUser(newUser)
+                FirebaseSyncHelper.syncAuthUser(newUser)
+                user = newUser
+            }
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     private fun hashPassword(password: String): String {

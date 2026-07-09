@@ -1,26 +1,37 @@
 {
   "project_info": {
-    "project_number": "123456789012",
-    "project_id": "wealthwise-dummy-project",
-    "storage_bucket": "wealthwise-dummy-project.appspot.com"
+    "project_number": "626076205858",
+    "firebase_url": "https://studentexpensetracking-default-rtdb.firebaseio.com",
+    "project_id": "studentexpensetracking",
+    "storage_bucket": "studentexpensetracking.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:123456789012:android:abcdef1234567890",
+        "mobilesdk_app_id": "1:626076205858:android:85bbd3c3b48859ad7f1b7b",
         "android_client_info": {
-          "package_name": "com.example.wealthwiseai"
+          "package_name": "com.company.finanicaltracker.wealthai"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "626076205858-5il6k9eq7h1o3is53ulvi3ijhingrbvc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "dummy_api_key_for_compilation_only"
+          "current_key": "AIzaSyCX923vjrdJY_e5RH11Z9qcMcky8aBGcz4"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "626076205858-5il6k9eq7h1o3is53ulvi3ijhingrbvc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

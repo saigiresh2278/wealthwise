@@ -11,10 +11,10 @@ interface AuthContextType {
   user: User | null
   profile: UserProfile | null
   isLoggedIn: boolean
-  loading: boolean
   darkMode: boolean
   login: (email: string, password: string) => boolean
   signup: (name: string, email: string, password: string) => boolean
+  loginWithGoogle: () => Promise<boolean>
   logout: () => void
   updateProfile: (p: UserProfile) => void
   refreshProfile: () => void
@@ -27,20 +27,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [darkMode, setDarkModeState] = useState(true)
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setDarkModeState(getDarkMode())
-    const email = getCurrentUser()
-    if (email) {
-      const users = getUsers()
-      const found = users.find(u => u.email === email)
-      if (found) {
-        setUser(found)
-        setProfile(getProfile(email))
+    
+    const syncWithFirebase = async () => {
+      // 1. Sync all registered users list from auth_users in Realtime Database
+      try {
+        const { db } = await import("@/lib/firebase")
+        const { ref, get } = await import("firebase/database")
+        if (db) {
+          const snapshot = await get(ref(db, "auth_users"))
+          const fbUsers: any[] = []
+          if (snapshot.exists()) {
+            const val = snapshot.val()
+            Object.keys(val).forEach(key => {
+              if (val[key]) {
+                fbUsers.push({
+                  email: val[key].email || key.replace(/,/g, "."),
+                  fullName: val[key].fullName || "",
+                  passwordHash: val[key].passwordHash || ""
+                })
+              }
+            })
+          }
+          if (fbUsers.length > 0) {
+            saveUsers(fbUsers)
+          }
+        }
+      } catch (e) {
+        console.error("Failed to sync registered users from Realtime Database: ", e)
+      }
+
+      const email = getCurrentUser()
+      if (email) {
+        const { pullDataFromFirestore } = await import("@/lib/store")
+        // 2. Fetch latest data from Realtime Database for active user
+        await pullDataFromFirestore(email)
+        
+        const users = getUsers()
+        const found = users.find(u => u.email === email)
+        if (found) {
+          setUser(found)
+          setProfile(getProfile(email))
+        }
       }
     }
-    setLoading(false)
+
+    syncWithFirebase()
   }, [])
 
   useEffect(() => {
@@ -54,6 +88,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(found)
       setCurrentUser(email)
       setProfile(getProfile(email))
+      // Pull Firestore data in background and refresh profile
+      import("@/lib/store").then(({ pullDataFromFirestore }) => {
+        pullDataFromFirestore(email).then(() => {
+          setProfile(getProfile(email))
+          refreshProfile()
+        })
+      })
       return true
     }
     return false
@@ -67,6 +108,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(newUser)
     setCurrentUser(email)
     return true
+  }
+
+  const loginWithGoogle = async (): Promise<boolean> => {
+    try {
+      const { auth } = await import("@/lib/firebase")
+      const { GoogleAuthProvider, signInWithPopup } = await import("firebase/auth")
+      if (!auth) return false
+      
+      const provider = new GoogleAuthProvider()
+      const result = await signInWithPopup(auth, provider)
+      const fbUser = result.user
+      
+      if (!fbUser.email) return false
+      
+      const email = fbUser.email
+      const fullName = fbUser.displayName || "Google User"
+      
+      const allUsers = getUsers()
+      let existingUser = allUsers.find(u => u.email === email)
+      
+      if (!existingUser) {
+        existingUser = { email, fullName, passwordHash: "google_oauth" }
+        saveUsers([...allUsers, existingUser])
+      }
+      
+      setUser(existingUser)
+      setCurrentUser(email)
+      
+      // Pull existing data from Realtime Database
+      const { pullDataFromFirestore, saveProfile, getProfile } = await import("@/lib/store")
+      await pullDataFromFirestore(email)
+      
+      // If profile still doesn't exist, create a default one
+      let userProfile = getProfile(email)
+      if (!userProfile) {
+        userProfile = {
+          email,
+          fullName,
+          age: 25,
+          occupation: "Student",
+          monthlyIncome: 0,
+          monthlyExpenses: 0,
+          monthlySavings: 0,
+          mainFinancialGoal: "Savings",
+          riskComfort: "Medium",
+          investmentExperience: "Beginner"
+        }
+        saveProfile(userProfile)
+      }
+      
+      setProfile(userProfile)
+      refreshProfile()
+      return true
+    } catch (e) {
+      console.error("Google Sign-In failed: ", e)
+      return false
+    }
   }
 
   const logout = () => {
@@ -93,8 +191,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={{
-      user, profile, isLoggedIn: !!user, loading, darkMode,
-      login, signup, logout, updateProfile, refreshProfile, toggleDarkMode
+      user, profile, isLoggedIn: !!user, darkMode,
+      login, signup, loginWithGoogle, logout, updateProfile, refreshProfile, toggleDarkMode
     }}>
       {children}
     </AuthContext.Provider>

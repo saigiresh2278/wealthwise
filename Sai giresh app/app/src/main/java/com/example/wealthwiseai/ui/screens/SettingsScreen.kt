@@ -28,7 +28,8 @@ import com.example.wealthwiseai.viewmodel.SettingsViewModel
 fun SettingsScreen(
     viewModel: SettingsViewModel,
     onResetCompleted: () -> Unit,
-    onNavigateToRiskQuiz: () -> Unit
+    onNavigateToRiskQuiz: () -> Unit,
+    onNavigateToDatabaseExplorer: () -> Unit
 ) {
     val userProfile by viewModel.userProfile.collectAsState()
     val isDarkMode by viewModel.isDarkMode.collectAsState()
@@ -115,7 +116,7 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("Dark Mode", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 15.sp)
+                        Text("Dark Mode", fontWeight = FontWeight.Bold, color = TextWhite, fontSize = 15.sp)
                         Text("Toggle the application visual theme", fontSize = 11.sp, color = TextGray)
                     }
                     Switch(
@@ -146,7 +147,7 @@ fun SettingsScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Column {
-                        Text("Edit Advisory Profile", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 15.sp)
+                        Text("Edit Advisory Profile", fontWeight = FontWeight.Bold, color = TextWhite, fontSize = 15.sp)
                         Text("Update your monthly parameters and goals", fontSize = 11.sp, color = TextGray)
                     }
                     Button(
@@ -175,7 +176,7 @@ fun SettingsScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Column {
-                        Text("Risk Profile Assessment", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 15.sp)
+                        Text("Risk Profile Assessment", fontWeight = FontWeight.Bold, color = TextWhite, fontSize = 15.sp)
                         Text("Re-evaluate your risk class with a 5-step quiz", fontSize = 11.sp, color = TextGray)
                     }
                     Button(
@@ -185,6 +186,35 @@ fun SettingsScreen(
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text("Retake Quiz", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+
+            // Database Explorer Card
+            Card(
+                colors = CardDefaults.cardColors(containerColor = CardBg),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Column {
+                        Text("Database Explorer", fontWeight = FontWeight.Bold, color = TextWhite, fontSize = 15.sp)
+                        Text("View, search, and delete all records in the local Room database", fontSize = 11.sp, color = TextGray)
+                    }
+                    Button(
+                        onClick = onNavigateToDatabaseExplorer,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = BlueAccent),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text("Explore Database", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -227,7 +257,7 @@ fun SettingsScreen(
                     .padding(vertical = 8.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("About WealthWise AI", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 15.sp)
+                    Text("About WealthWise AI", fontWeight = FontWeight.Bold, color = TextWhite, fontSize = 15.sp)
                     Spacer(modifier = Modifier.height(6.dp))
                     Text("Version: 1.0.0", fontSize = 12.sp, color = TextGray)
                     Text("Package: com.example.wealthwiseai", fontSize = 12.sp, color = TextGray)
@@ -244,8 +274,8 @@ fun SettingsScreen(
         if (showResetDialog) {
             AlertDialog(
                 onDismissRequest = { showResetDialog = false },
-                title = { Text("Wipe All Data?", fontWeight = FontWeight.Bold, color = Color.White) },
-                text = { Text("Are you sure you want to delete your profile, transactions, goals, and risk results? This cannot be undone.", color = Color.LightGray) },
+                title = { Text("Wipe All Data?", fontWeight = FontWeight.Bold, color = TextWhite) },
+                text = { Text("Are you sure you want to delete your profile, transactions, goals, and risk results? This cannot be undone.", color = TextGray) },
                 confirmButton = {
                     Button(
                         onClick = {
@@ -272,7 +302,7 @@ fun SettingsScreen(
         if (showEditProfileDialog) {
             AlertDialog(
                 onDismissRequest = { showEditProfileDialog = false },
-                title = { Text("Edit Advisory Profile", fontWeight = FontWeight.Bold, color = Color.White) },
+                title = { Text("Edit Advisory Profile", fontWeight = FontWeight.Bold, color = TextWhite) },
                 text = {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp),

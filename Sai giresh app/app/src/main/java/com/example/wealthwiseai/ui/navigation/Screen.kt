@@ -13,4 +13,5 @@ sealed class Screen(val route: String) {
     object Learn : Screen("learn")
     object Profile : Screen("profile")
     object Settings : Screen("settings")
+    object DatabaseExplorer : Screen("db_explorer")
 }

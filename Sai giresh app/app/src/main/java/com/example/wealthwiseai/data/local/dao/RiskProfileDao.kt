@@ -14,4 +14,10 @@ interface RiskProfileDao {
 
     @Query("DELETE FROM risk_profiles")
     suspend fun clearRiskProfile()
+
+    @Query("SELECT * FROM risk_profiles")
+    fun getAllRiskProfiles(): Flow<List<RiskProfileEntity>>
+
+    @Delete
+    suspend fun deleteRiskProfile(profile: RiskProfileEntity)
 }

@@ -1,6 +1,23 @@
 @import "tailwindcss";
 
 :root {
+  /* Light mode defaults */
+  --bg-primary: #f3f4f6;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f9fafb;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --accent-blue: #3f8cff;
+  --accent-green: #10b981;
+  --accent-red: #ef4444;
+  --accent-yellow: #f59e0b;
+  --accent-purple: #8b5cf6;
+  --accent-cyan: #06b6d4;
+  --border: #e5e7eb;
+}
+
+.dark {
+  /* Dark mode overrides */
   --bg-primary: #0a0e1a;
   --bg-card: #131829;
   --bg-card-hover: #1a2038;
@@ -15,37 +32,51 @@
   --border: #1e2844;
 }
 
+/* Global utility overrides for light mode text readability */
+:root:not(.dark) .text-white:not(.gradient-btn):not(button):not(.bg-\[\#4f8cff\]) {
+  color: var(--text-primary) !important;
+}
+
+:root:not(.dark) .text-gray-300 {
+  color: var(--text-secondary) !important;
+}
+
+:root:not(.dark) .text-gray-400 {
+  color: var(--text-secondary) !important;
+}
+
+:root:not(.dark) .text-gray-500 {
+  color: var(--text-secondary) !important;
+}
+
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
-}
-
-.dark body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .glass-card {
-  background: linear-gradient(135deg, rgba(19, 24, 41, 0.9), rgba(26, 32, 56, 0.6));
+  background: var(--bg-card);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border);
   border-radius: 16px;
+  transition: background-color 0.2s, border-color 0.2s;
 }
 
 .glass-card:hover {
-  background: linear-gradient(135deg, rgba(26, 32, 56, 0.95), rgba(30, 40, 68, 0.7));
+  background: var(--bg-card-hover);
   border-color: rgba(79, 140, 255, 0.3);
 }
 
 .gradient-btn {
-  background: linear-gradient(135deg, #4f8cff, #6366f1);
+  background: linear-gradient(135deg, #3f8cff, #6366f1);
   transition: all 0.2s;
 }
 
 .gradient-btn:hover {
-  background: linear-gradient(135deg, #5f9cff, #7376ff);
-  box-shadow: 0 4px 20px rgba(79, 140, 255, 0.4);
+  background: linear-gradient(135deg, #4f9cff, #7376ff);
+  box-shadow: 0 4px 20px rgba(63, 140, 255, 0.4);
 }
 
 .health-ring {
@@ -67,13 +98,13 @@ body {
 }
 
 input, select, textarea {
-  background: rgba(19, 24, 41, 0.8);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 10px;
   color: var(--text-primary);
   padding: 10px 14px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background-color 0.2s, color 0.2s;
 }
 
 input:focus, select:focus, textarea:focus {

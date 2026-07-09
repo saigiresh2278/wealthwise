@@ -1,6 +1,7 @@
 package com.example.wealthwiseai.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -41,6 +42,11 @@ fun LoginScreen(
     
     var emailError by remember { mutableStateOf("") }
     var passwordError by remember { mutableStateOf("") }
+
+    var showGoogleAccountPicker by remember { mutableStateOf(false) }
+    var showCustomEmailInput by remember { mutableStateOf(false) }
+    var customEmail by remember { mutableStateOf("") }
+    var customName by remember { mutableStateOf("") }
 
     val loginState by viewModel.loginState.collectAsState()
 
@@ -189,6 +195,201 @@ fun LoginScreen(
 
                         if (isEmailValid && isPassValid) {
                             viewModel.login(email.trim(), password)
+                        }
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Or divider
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+            ) {
+                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
+                Text(
+                    text = "OR",
+                    color = TextGray,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+                Divider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Google Sign-In Button
+            OutlinedButton(
+                onClick = { showGoogleAccountPicker = true },
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f))
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "G",
+                        fontWeight = FontWeight.Black,
+                        color = BlueAccent,
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                    Text(text = "Sign in with Google", fontWeight = FontWeight.Bold)
+                }
+            }
+
+            // Dialogs for Google Sign-In simulation
+            if (showGoogleAccountPicker) {
+                AlertDialog(
+                    onDismissRequest = { showGoogleAccountPicker = false },
+                    title = {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                            Text("Google", fontWeight = FontWeight.Bold, fontSize = 24.sp, color = MaterialTheme.colorScheme.onSurface)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("Choose an account", fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
+                            Text("to continue to WealthWise AI", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                        }
+                    },
+                    text = {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f), modifier = Modifier.padding(vertical = 8.dp))
+                            
+                            // Account 1
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        showGoogleAccountPicker = false
+                                        viewModel.loginWithGoogle("sai.giresh@gmail.com", "K. Venkata Sai Giresh")
+                                    }
+                                    .padding(vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = BlueAccent.copy(alpha = 0.1f),
+                                    modifier = Modifier.size(36.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text("K", color = BlueAccent, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                    }
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text("K. Venkata Sai Giresh", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+                                    Text("sai.giresh@gmail.com", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                }
+                            }
+
+                            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+
+                            // Account 2
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        showGoogleAccountPicker = false
+                                        viewModel.loginWithGoogle("student.test@gmail.com", "Test Student")
+                                    }
+                                    .padding(vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = GreenAccent.copy(alpha = 0.1f),
+                                    modifier = Modifier.size(36.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text("T", color = GreenAccent, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                    }
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text("Test Student", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+                                    Text("student.test@gmail.com", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                }
+                            }
+
+                            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+
+                            // Use another account
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        showGoogleAccountPicker = false
+                                        showCustomEmailInput = true
+                                    }
+                                    .padding(vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                                    modifier = Modifier.size(36.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text("+", color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                                    }
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text("Use another account", fontWeight = FontWeight.Medium, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+                            }
+                        }
+                    },
+                    confirmButton = {},
+                    dismissButton = {
+                        TextButton(onClick = { showGoogleAccountPicker = false }) {
+                            Text("Cancel", color = BlueAccent)
+                        }
+                    }
+                )
+            }
+
+            if (showCustomEmailInput) {
+                AlertDialog(
+                    onDismissRequest = { showCustomEmailInput = false },
+                    title = { Text("Sign in with Google", fontWeight = FontWeight.Bold) },
+                    text = {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            OutlinedTextField(
+                                value = customName,
+                                onValueChange = { customName = it },
+                                label = { Text("Full Name") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            OutlinedTextField(
+                                value = customEmail,
+                                onValueChange = { customEmail = it },
+                                label = { Text("Google Email") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                if (customEmail.trim().isNotEmpty() && customName.trim().isNotEmpty()) {
+                                    showCustomEmailInput = false
+                                    viewModel.loginWithGoogle(customEmail.trim(), customName.trim())
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = BlueAccent)
+                        ) {
+                            Text("Sign In")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showCustomEmailInput = false }) {
+                            Text("Cancel", color = TextGray)
                         }
                     }
                 )

@@ -17,12 +17,12 @@ private val DarkColorScheme = darkColorScheme(
     secondary = GreenAccent,
     tertiary = GoldAccent,
     background = DarkBg,
-    surface = CardBg,
+    surface = Color(0xFF151D30),
     onPrimary = Color.White,
     onSecondary = Color.Black,
     onTertiary = Color.Black,
-    onBackground = TextWhite,
-    onSurface = TextWhite,
+    onBackground = Color(0xFFF3F4F6),
+    onSurface = Color(0xFFF3F4F6),
     error = RedAccent
 )
 

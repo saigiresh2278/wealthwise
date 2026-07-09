@@ -28,6 +28,15 @@ import com.example.wealthwiseai.ui.theme.*
 import com.example.wealthwiseai.viewmodel.TransactionViewModel
 import java.text.SimpleDateFormat
 import java.util.*
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
+import com.example.wealthwiseai.util.ReceiptOcrHelper
+import com.example.wealthwiseai.util.ReceiptParser
+import kotlinx.coroutines.launch
+import java.io.File
 
 @Composable
 fun TransactionManagementScreen(
@@ -51,8 +60,73 @@ fun TransactionManagementScreen(
     val categories = listOf("Food", "Travel", "Rent", "Education", "Shopping", "Bills", "Health", "Investment", "Salary", "Freelance", "Others")
     val types = listOf("Income", "Expense")
 
+    // Scanning states and helper launch tools
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    var isScanning by remember { mutableStateOf(false) }
+    var isOcrPopulated by remember { mutableStateOf(false) }
+    var scanningError by remember { mutableStateOf<String?>(null) }
+    var showScanOptionDialog by remember { mutableStateOf(false) }
+    var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
+
+    fun processReceiptUri(uri: Uri) {
+        isScanning = true
+        scanningError = null
+        coroutineScope.launch {
+            try {
+                val rawText = ReceiptOcrHelper.recognizeText(context, uri)
+                if (rawText.trim().isNotEmpty()) {
+                    val parsed = ReceiptParser.parse(rawText)
+                    amountStr = if (parsed.amount > 0) parsed.amount.toString() else ""
+                    category = parsed.category
+                    note = parsed.merchant
+                    type = "Expense"
+                    amountError = ""
+                    isOcrPopulated = true
+                    showAddDialog = true
+                } else {
+                    scanningError = "No text could be extracted from the receipt. Please try again with a clearer image."
+                }
+            } catch (e: Exception) {
+                scanningError = "Failed to parse receipt: ${e.localizedMessage}"
+            } finally {
+                isScanning = false
+            }
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            processReceiptUri(uri)
+        }
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success: Boolean ->
+        if (success) {
+            tempPhotoUri?.let { uri ->
+                processReceiptUri(uri)
+            }
+        }
+    }
+
+    fun createTempPhotoUri(): Uri {
+        val tempFile = File(context.cacheDir, "receipt_${System.currentTimeMillis()}.jpg")
+        return FileProvider.getUriForFile(
+            context,
+            "com.company.finanicaltracker.wealthai.fileprovider",
+            tempFile
+        )
+    }
+
     LaunchedEffect(showAddDialog, editingTransaction) {
-        if (editingTransaction != null) {
+        if (isOcrPopulated) {
+            isOcrPopulated = false
+        } else if (editingTransaction != null) {
             amountStr = editingTransaction!!.amount.toString()
             category = editingTransaction!!.category
             note = editingTransaction!!.note
@@ -84,10 +158,10 @@ fun TransactionManagementScreen(
             ) {
                 SectionHeader("Manage Transactions")
                 Button(
-                    onClick = { showAddDialog = true },
+                    onClick = { showScanOptionDialog = true },
                     colors = ButtonDefaults.buttonColors(containerColor = BlueAccent)
                 ) {
-                    Text("Add New", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("Add Expense", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -228,6 +302,135 @@ fun TransactionManagementScreen(
                 },
                 containerColor = CardBg,
                 shape = RoundedCornerShape(24.dp)
+            )
+        }
+
+        // OCR Receipt Scanning Dialogs
+        if (showScanOptionDialog) {
+            AlertDialog(
+                onDismissRequest = { showScanOptionDialog = false },
+                title = {
+                    Text(
+                        text = "Add Expense",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                },
+                text = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = "Choose how you want to add the transaction:",
+                            color = TextGray,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Button(
+                            onClick = {
+                                showScanOptionDialog = false
+                                amountStr = ""
+                                category = "Food"
+                                note = ""
+                                type = "Expense"
+                                amountError = ""
+                                showAddDialog = true
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = BlueAccent),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Add Manually", color = Color.White, fontWeight = FontWeight.Bold)
+                        }
+                        Button(
+                            onClick = {
+                                showScanOptionDialog = false
+                                try {
+                                    val uri = createTempPhotoUri()
+                                    tempPhotoUri = uri
+                                    cameraLauncher.launch(uri)
+                                } catch (e: Exception) {
+                                    scanningError = "Failed to launch camera: ${e.localizedMessage}"
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = CardBg),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, BlueAccent),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Scan Receipt (Camera)", color = BlueAccent, fontWeight = FontWeight.Bold)
+                        }
+                        Button(
+                            onClick = {
+                                showScanOptionDialog = false
+                                galleryLauncher.launch("image/*")
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = CardBg),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, BlueAccent),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Scan Receipt (Gallery)", color = BlueAccent, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                },
+                confirmButton = {},
+                dismissButton = {
+                    TextButton(onClick = { showScanOptionDialog = false }) {
+                        Text("Cancel", color = TextGray)
+                    }
+                },
+                containerColor = CardBg,
+                shape = RoundedCornerShape(24.dp)
+            )
+        }
+
+        if (isScanning) {
+            AlertDialog(
+                onDismissRequest = {},
+                confirmButton = {},
+                title = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = BlueAccent)
+                    }
+                },
+                text = {
+                    Text(
+                        text = "Scanning receipt using ML Kit OCR...",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color.White
+                    )
+                },
+                containerColor = CardBg,
+                shape = RoundedCornerShape(16.dp)
+            )
+        }
+
+        if (scanningError != null) {
+            AlertDialog(
+                onDismissRequest = { scanningError = null },
+                title = {
+                    Text(
+                        text = "Scanning Failed",
+                        fontWeight = FontWeight.Bold,
+                        color = RedAccent
+                    )
+                },
+                text = {
+                    Text(text = scanningError ?: "", color = Color.White)
+                },
+                confirmButton = {
+                    Button(
+                        onClick = { scanningError = null },
+                        colors = ButtonDefaults.buttonColors(containerColor = BlueAccent)
+                    ) {
+                        Text("OK", color = Color.White)
+                    }
+                },
+                containerColor = CardBg,
+                shape = RoundedCornerShape(16.dp)
             )
         }
     }

@@ -20,4 +20,7 @@ interface TransactionDao {
 
     @Query("DELETE FROM transactions")
     suspend fun clearTransactions()
+
+    @Query("SELECT * FROM transactions ORDER BY date DESC")
+    fun getAllTransactionsAdmin(): Flow<List<TransactionEntity>>
 }

@@ -231,6 +231,19 @@ fun MainAppContent(settingsViewModel: SettingsViewModel) {
                     },
                     onNavigateToRiskQuiz = {
                         navController.navigate("risk_quiz")
+                    },
+                    onNavigateToDatabaseExplorer = {
+                        navController.navigate(Screen.DatabaseExplorer.route)
+                    }
+                )
+            }
+
+            composable(Screen.DatabaseExplorer.route) {
+                val dbViewModel: DatabaseExplorerViewModel = viewModel()
+                DatabaseExplorerScreen(
+                    viewModel = dbViewModel,
+                    onBack = {
+                        navController.popBackStack()
                     }
                 )
             }

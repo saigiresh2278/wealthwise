@@ -60,6 +60,25 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun loginWithGoogle(email: String, fullName: String) {
+        if (email.trim().isEmpty()) {
+            _loginState.value = AuthState.Error("Email is required")
+            return
+        }
+
+        _loginState.value = AuthState.Loading
+        viewModelScope.launch {
+            authRepository.authenticateOrRegisterGoogleUser(email, fullName)
+                .onSuccess { user ->
+                    sessionManager.login(user.email)
+                    _loginState.value = AuthState.Success(user.email)
+                }
+                .onFailure { error ->
+                    _loginState.value = AuthState.Error(error.message ?: "Google authentication failed")
+                }
+        }
+    }
+
     fun resetStates() {
         _loginState.value = AuthState.Idle
         _signupState.value = AuthState.Idle

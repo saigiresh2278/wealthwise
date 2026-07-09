@@ -20,4 +20,7 @@ interface UserProfileDao {
 
     @Query("DELETE FROM user_profile")
     suspend fun clearProfile()
+
+    @Query("SELECT * FROM user_profile")
+    fun getAllProfiles(): Flow<List<UserProfileEntity>>
 }

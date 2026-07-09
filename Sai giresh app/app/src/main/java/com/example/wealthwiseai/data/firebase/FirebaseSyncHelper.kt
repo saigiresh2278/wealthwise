@@ -4,22 +4,29 @@ import android.content.Context
 import android.util.Log
 import com.example.wealthwiseai.data.local.entity.*
 import com.google.firebase.FirebaseApp
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 object FirebaseSyncHelper {
     private const val TAG = "FirebaseSyncHelper"
 
-    private val db: FirebaseFirestore? by lazy {
+    private val db: FirebaseDatabase? by lazy {
         try {
-            FirebaseFirestore.getInstance()
+            FirebaseDatabase.getInstance()
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to get Firestore instance: ${e.message}")
+            Log.e(TAG, "Failed to get Realtime Database instance: ${e.message}")
             null
         }
+    }
+
+    private fun encodeEmail(email: String): String {
+        return email.trim().lowercase().replace(".", ",")
     }
 
     fun init(context: Context) {
@@ -36,7 +43,9 @@ object FirebaseSyncHelper {
     fun syncUserProfile(profile: UserProfileEntity) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val firestore = db ?: return@launch
+                val database = db ?: return@launch
+                val emailKey = encodeEmail(profile.email)
+                val ref = database.getReference("users").child(emailKey)
                 val data = mapOf(
                     "email" to profile.email,
                     "fullName" to profile.fullName,
@@ -49,7 +58,7 @@ object FirebaseSyncHelper {
                     "riskComfort" to profile.riskComfort,
                     "investmentExperience" to profile.investmentExperience
                 )
-                firestore.collection("users").document(profile.email).set(data)
+                ref.setValue(data)
                     .addOnSuccessListener { Log.d(TAG, "UserProfile synced successfully") }
                     .addOnFailureListener { e -> Log.e(TAG, "UserProfile sync failed: ${e.message}") }
             } catch (e: Exception) {
@@ -61,18 +70,20 @@ object FirebaseSyncHelper {
     fun syncTransaction(transaction: TransactionEntity) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val firestore = db ?: return@launch
-                val docId = "${transaction.userEmail}_${transaction.id}"
+                val database = db ?: return@launch
+                val emailKey = encodeEmail(transaction.userEmail)
+                val ref = database.getReference("transactions").child(emailKey).child(transaction.id.toString())
+                val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(transaction.date))
                 val data = mapOf(
                     "id" to transaction.id,
                     "userEmail" to transaction.userEmail,
                     "amount" to transaction.amount,
                     "category" to transaction.category,
                     "note" to transaction.note,
-                    "date" to transaction.date,
+                    "date" to formattedDate,
                     "type" to transaction.type
                 )
-                firestore.collection("transactions").document(docId).set(data)
+                ref.setValue(data)
                     .addOnSuccessListener { Log.d(TAG, "Transaction synced successfully") }
                     .addOnFailureListener { e -> Log.e(TAG, "Transaction sync failed: ${e.message}") }
             } catch (e: Exception) {
@@ -84,9 +95,10 @@ object FirebaseSyncHelper {
     fun deleteTransaction(transaction: TransactionEntity) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val firestore = db ?: return@launch
-                val docId = "${transaction.userEmail}_${transaction.id}"
-                firestore.collection("transactions").document(docId).delete()
+                val database = db ?: return@launch
+                val emailKey = encodeEmail(transaction.userEmail)
+                val ref = database.getReference("transactions").child(emailKey).child(transaction.id.toString())
+                ref.removeValue()
                     .addOnSuccessListener { Log.d(TAG, "Transaction deleted successfully from sync") }
                     .addOnFailureListener { e -> Log.e(TAG, "Transaction deletion from sync failed: ${e.message}") }
             } catch (e: Exception) {
@@ -98,18 +110,20 @@ object FirebaseSyncHelper {
     fun syncGoal(goal: GoalEntity) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val firestore = db ?: return@launch
-                val docId = "${goal.userEmail}_${goal.id}"
+                val database = db ?: return@launch
+                val emailKey = encodeEmail(goal.userEmail)
+                val ref = database.getReference("goals").child(emailKey).child(goal.id.toString())
+                val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(goal.targetDate))
                 val data = mapOf(
                     "id" to goal.id,
                     "userEmail" to goal.userEmail,
                     "goalName" to goal.goalName,
                     "targetAmount" to goal.targetAmount,
                     "currentSavedAmount" to goal.currentSavedAmount,
-                    "targetDate" to goal.targetDate,
+                    "targetDate" to formattedDate,
                     "priority" to goal.priority
                 )
-                firestore.collection("goals").document(docId).set(data)
+                ref.setValue(data)
                     .addOnSuccessListener { Log.d(TAG, "Goal synced successfully") }
                     .addOnFailureListener { e -> Log.e(TAG, "Goal sync failed: ${e.message}") }
             } catch (e: Exception) {
@@ -121,9 +135,10 @@ object FirebaseSyncHelper {
     fun deleteGoal(goal: GoalEntity) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val firestore = db ?: return@launch
-                val docId = "${goal.userEmail}_${goal.id}"
-                firestore.collection("goals").document(docId).delete()
+                val database = db ?: return@launch
+                val emailKey = encodeEmail(goal.userEmail)
+                val ref = database.getReference("goals").child(emailKey).child(goal.id.toString())
+                ref.removeValue()
                     .addOnSuccessListener { Log.d(TAG, "Goal deleted successfully from sync") }
                     .addOnFailureListener { e -> Log.e(TAG, "Goal deletion from sync failed: ${e.message}") }
             } catch (e: Exception) {
@@ -135,15 +150,17 @@ object FirebaseSyncHelper {
     fun syncRiskProfile(riskProfile: RiskProfileEntity) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val firestore = db ?: return@launch
-                val docId = riskProfile.email
+                val database = db ?: return@launch
+                val emailKey = encodeEmail(riskProfile.email)
+                val ref = database.getReference("risk_profiles").child(emailKey)
+                val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(riskProfile.lastAssessmentDate))
                 val data = mapOf(
                     "email" to riskProfile.email,
                     "score" to riskProfile.score,
                     "riskClass" to riskProfile.riskClass,
-                    "lastAssessmentDate" to riskProfile.lastAssessmentDate
+                    "lastAssessmentDate" to formattedDate
                 )
-                firestore.collection("risk_profiles").document(docId).set(data)
+                ref.setValue(data)
                     .addOnSuccessListener { Log.d(TAG, "RiskProfile synced successfully") }
                     .addOnFailureListener { e -> Log.e(TAG, "RiskProfile sync failed: ${e.message}") }
             } catch (e: Exception) {
@@ -155,13 +172,15 @@ object FirebaseSyncHelper {
     fun syncAuthUser(user: AuthEntity) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val firestore = db ?: return@launch
+                val database = db ?: return@launch
+                val emailKey = encodeEmail(user.email)
+                val ref = database.getReference("auth_users").child(emailKey)
                 val data = mapOf(
                     "email" to user.email,
                     "fullName" to user.fullName,
                     "passwordHash" to user.passwordHash
                 )
-                firestore.collection("auth_users").document(user.email).set(data)
+                ref.setValue(data)
                     .addOnSuccessListener { Log.d(TAG, "AuthUser synced successfully") }
                     .addOnFailureListener { e -> Log.e(TAG, "AuthUser sync failed: ${e.message}") }
             } catch (e: Exception) {
@@ -171,14 +190,16 @@ object FirebaseSyncHelper {
     }
 
     suspend fun fetchAuthUserDirect(email: String): AuthEntity? {
+        val database = db ?: return null
+        val emailKey = encodeEmail(email)
+        val ref = database.getReference("auth_users").child(emailKey)
         return try {
-            val firestore = db ?: return null
-            val document = firestore.collection("auth_users").document(email).get().await()
-            if (document.exists()) {
+            val snapshot = ref.get().await()
+            if (snapshot.exists()) {
                 AuthEntity(
-                    email = document.getString("email") ?: "",
-                    fullName = document.getString("fullName") ?: "",
-                    passwordHash = document.getString("passwordHash") ?: ""
+                    email = snapshot.child("email").getValue(String::class.java) ?: "",
+                    fullName = snapshot.child("fullName").getValue(String::class.java) ?: "",
+                    passwordHash = snapshot.child("passwordHash").getValue(String::class.java) ?: ""
                 )
             } else {
                 null
@@ -192,37 +213,14 @@ object FirebaseSyncHelper {
     fun clearUserData(email: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val firestore = db ?: return@launch
-                // Delete user profile
-                firestore.collection("users").document(email).delete()
-                
-                // Delete auth profile
-                firestore.collection("auth_users").document(email).delete()
-
-                // Delete risk profile
-                firestore.collection("risk_profiles").document(email).delete()
-                
-                // Delete user transactions
-                firestore.collection("transactions")
-                    .whereEqualTo("userEmail", email)
-                    .get()
-                    .addOnSuccessListener { snapshot ->
-                        for (doc in snapshot.documents) {
-                            doc.reference.delete()
-                        }
-                        Log.d(TAG, "User transactions cleared from sync")
-                    }
-                
-                // Delete user goals
-                firestore.collection("goals")
-                    .whereEqualTo("userEmail", email)
-                    .get()
-                    .addOnSuccessListener { snapshot ->
-                        for (doc in snapshot.documents) {
-                            doc.reference.delete()
-                        }
-                        Log.d(TAG, "User goals cleared from sync")
-                    }
+                val database = db ?: return@launch
+                val emailKey = encodeEmail(email)
+                database.getReference("users").child(emailKey).removeValue()
+                database.getReference("auth_users").child(emailKey).removeValue()
+                database.getReference("risk_profiles").child(emailKey).removeValue()
+                database.getReference("transactions").child(emailKey).removeValue()
+                database.getReference("goals").child(emailKey).removeValue()
+                Log.d(TAG, "User data cleared from Realtime Database sync")
             } catch (e: Exception) {
                 Log.e(TAG, "Error clearing user data from sync: ${e.message}")
             }
