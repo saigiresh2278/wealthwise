@@ -22,6 +22,11 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'Sai giresh app/frontend/package-lock.json'
 
+      - name: Setup Chrome Browser
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
       - name: Install Frontend Dependencies
         run: |
           cd "Sai giresh app/frontend"
@@ -41,18 +46,19 @@ jobs:
       - name: Start Next.js App in Background
         run: |
           cd "Sai giresh app/frontend"
-          # Run dev in background since it is faster and bypasses strict build-time lint checks in CI
           npm run dev &
-          # Wait until port 3000 is open and responsive
           npx wait-on http://localhost:3000 --timeout 60000
 
       - name: Run Selenium E2E Tests
         run: |
           cd "Sai giresh app/frontend/selenium-tests"
           npm test
+        env:
+          DISPLAY: ':99'
 
       - name: Upload Selenium Excel Report Artifact
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: Selenium-E2E-Test-Cases
-          path: Sai giresh app/frontend/selenium-tests/WealthWise_E2E_Test_Cases.xlsx
+          path: "Sai giresh app/frontend/selenium-tests/WealthWise_E2E_Test_Cases.xlsx"

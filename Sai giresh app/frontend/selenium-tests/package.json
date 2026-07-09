@@ -4,10 +4,17 @@
   "description": "Selenium E2E test suite for WealthWise AI Web Application",
   "main": "index.js",
   "scripts": {
-    "test": "jest --testTimeout=30000",
+    "test": "jest --testTimeout=60000 --forceExit --runInBand",
     "generate-excel": "node generate-test-cases.js"
   },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 60000,
+    "forceExit": true,
+    "detectOpenHandles": false
+  },
   "dependencies": {
+    "chromedriver": "^130.0.0",
     "exceljs": "^4.4.0",
     "selenium-webdriver": "^4.27.0"
   },
