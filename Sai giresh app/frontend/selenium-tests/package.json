@@ -1,16 +1,17 @@
 {
   "name": "wealthwise-selenium-tests",
   "version": "1.0.0",
-  "description": "End-to-End Selenium Testing Suite for WealthWise Web Frontend",
-  "main": "tests/login.test.js",
+  "description": "Selenium E2E test suite for WealthWise AI Web Application",
+  "main": "index.js",
   "scripts": {
-    "test": "mocha tests/**/*.test.js --timeout 30000 --exit"
+    "test": "jest --testTimeout=30000",
+    "generate-excel": "node generate-test-cases.js"
   },
   "dependencies": {
     "exceljs": "^4.4.0",
-    "selenium-webdriver": "^4.18.1"
+    "selenium-webdriver": "^4.27.0"
   },
   "devDependencies": {
-    "mocha": "^10.3.0"
+    "jest": "^29.7.0"
   }
 }

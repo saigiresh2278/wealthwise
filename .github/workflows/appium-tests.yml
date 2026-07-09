@@ -25,7 +25,7 @@ jobs:
       - name: Install Appium & Dependencies
         run: |
           cd "Sai giresh app/app/appium-test"
-          npm ci
+          npm install --prefer-offline
 
       - name: Generate E2E Test Cases Excel Sheet
         run: |

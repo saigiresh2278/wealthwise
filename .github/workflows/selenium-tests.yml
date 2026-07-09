@@ -22,17 +22,21 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'Sai giresh app/frontend/package-lock.json'
 
-      - name: Install Frontend & Test Dependencies
+      - name: Install Frontend Dependencies
         run: |
           cd "Sai giresh app/frontend"
-          npm ci
-          cd "selenium-tests"
-          npm ci
+          npm install --prefer-offline
+
+      - name: Install Selenium Test Dependencies
+        run: |
+          cd "Sai giresh app/frontend/selenium-tests"
+          npm install --prefer-offline
 
       - name: Generate E2E Test Cases Excel Sheet
         run: |
           cd "Sai giresh app/frontend/selenium-tests"
           node generate-test-cases.js
+        continue-on-error: true
 
       - name: Start Next.js App in Background
         run: |

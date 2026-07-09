@@ -1,5 +1,0 @@
-# dependencies
-node_modules/
-
-# local excel report (we can choose to commit or ignore, but the user explicitly requested us to generate it, so committing it is fine or ignoring it is fine. Let's not ignore the generated Excel report since it's the deliverable!)
-# WealthWise_E2E_Test_Cases.xlsx
