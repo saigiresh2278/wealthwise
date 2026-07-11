@@ -79,6 +79,12 @@ jobs:
           name: load-test-report
           # The quotes below are required to handle the spaces in "Sai giresh app"
           path: "Sai giresh app/backend/reports/WealthWise_LoadTest_Report_*"
+      - name: Generate Load Test Job Summary
+        if: always()
+        run: |
+          cd "Sai giresh app/backend/automated-test"
+          npm install
+          node print-summary.js
 
       - name: Commit and Push Excel Reports
         if: always()

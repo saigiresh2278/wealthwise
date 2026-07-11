@@ -1,0 +1,14 @@
+{
+  "name": "wealthwise-load-test",
+  "version": "1.0.0",
+  "description": "Baseline load test suite for WealthWise AI backend — 100 users, 60s, real-time Excel report",
+  "main": "loadtest.js",
+  "scripts": {
+    "test": "node loadtest.js",
+    "report": "node generateReport.js"
+  },
+  "dependencies": {
+    "autocannon": "^7.15.0",
+    "exceljs": "^4.4.0"
+  }
+}
