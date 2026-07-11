@@ -1,4 +1,4 @@
-﻿name: Deploy Next.js to GitHub Pages
+name: Deploy Next.js to GitHub Pages
 
 on:
   push:
@@ -30,8 +30,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "npm"
-          cache-dependency-path: "Sai giresh app/frontend/package-lock.json"
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5

@@ -19,8 +19,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
-          cache-dependency-path: 'Sai giresh app/app/appium-test/package-lock.json'
 
       - name: Install Appium & Dependencies
         run: |
