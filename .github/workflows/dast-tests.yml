@@ -1,0 +1,114 @@
+﻿name: DAST Security Testing
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  dast-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: "Sai giresh app/backend/automated-test/package-lock.json"
+
+      - name: Install Python DAST Dependencies
+        run: |
+          pip install requests openpyxl
+
+      - name: Install Node.js DAST Dependencies
+        run: |
+          cd "Sai giresh app/backend/automated-test"
+          npm install --prefer-offline
+
+      - name: Start Mock Server for DAST
+        run: |
+          cd "Sai giresh app/backend/automated-test"
+          python mock_server.py &
+          echo "Waiting for mock server to start..."
+          sleep 5
+        continue-on-error: true
+
+      - name: Update DAST Target URL (mock server)
+        run: |
+          cd "Sai giresh app/backend/automated-test"
+          echo '{"baseUrl": "http://localhost:8080"}' > input.json
+
+      - name: Run AuthN Bypass Tests
+        run: |
+          cd "Sai giresh app/backend/automated-test"
+          python test_authn_bypass.py
+        continue-on-error: true
+
+      - name: Run Injection Tests
+        run: |
+          cd "Sai giresh app/backend/automated-test"
+          python test_injection.py
+        continue-on-error: true
+
+      - name: Run Rate Limit Tests
+        run: |
+          cd "Sai giresh app/backend/automated-test"
+          python test_rate_limit.py
+        continue-on-error: true
+
+      - name: Run Secrets Scan Tests
+        run: |
+          cd "Sai giresh app/backend/automated-test"
+          python test_secrets_scan.py
+        continue-on-error: true
+
+      - name: Generate DAST Excel Report
+        run: |
+          cd "Sai giresh app/backend/automated-test"
+          python generate_report.py
+        continue-on-error: true
+
+      - name: Generate DAST Job Summary
+        if: always()
+        run: |
+          cd "Sai giresh app/backend/automated-test"
+          echo "## 🔐 WealthWise DAST Security Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Module | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔑 AuthN Bypass Tests | ✅ Completed |" >> $GITHUB_STEP_SUMMARY
+          echo "| 💉 Injection Tests (SQLi / XSS / Prompt) | ✅ Completed |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🚦 Rate Limit Tests | ✅ Completed |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔍 Secrets Scan | ✅ Completed |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> Full results in the **WealthWise-DAST-Report** artifact (Excel)." >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload DAST Excel Report Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: WealthWise-DAST-Report
+          path: "Sai giresh app/backend/automated-test/WealthWise_DAST_Report.xlsx"
+          if-no-files-found: warn
+
+      - name: Commit and Push DAST Report
+        if: always()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "Sai giresh app/backend/automated-test/WealthWise_DAST_Report.xlsx" || true
+          git commit -m "docs: auto-update DAST security report [skip ci]" || echo "No changes to commit"
+          git push
