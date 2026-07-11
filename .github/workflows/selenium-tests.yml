@@ -72,12 +72,13 @@ jobs:
           name: Selenium-E2E-Test-Cases
           path: "Sai giresh app/frontend/selenium-tests/WealthWise_E2E_Test_Cases.xlsx"
 
-      - name: Upload Load Test Excel Report Artifact
+      - name: Upload Load Test Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: WealthWise-Load-Test-Report
-          path: "Sai giresh app/backend/reports/WealthWise_LoadTest_Report_*.xlsx"
+          name: load-test-report
+          # The quotes below are required to handle the spaces in "Sai giresh app"
+          path: "Sai giresh app/backend/reports/WealthWise_LoadTest_Report_*"
 
       - name: Commit and Push Excel Reports
         if: always()
