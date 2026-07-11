@@ -92,4 +92,8 @@ jobs:
           git add "Sai giresh app/frontend/selenium-tests/WealthWise_E2E_Test_Cases.xlsx" || true
           git add "Sai giresh app/backend/reports/WealthWise_LoadTest_Report_*.xlsx" || true
           git commit -m "docs: auto-update test reports [skip ci]" || echo "No changes to commit"
-          git push
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push origin main && break
+            echo "Push attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
