@@ -48,7 +48,7 @@ jobs:
       - name: Install Dependencies
         run: |
           cd "Sai giresh app/frontend"
-          npm ci
+          npm install
 
       - name: Build with Next.js (static export)
         run: |
