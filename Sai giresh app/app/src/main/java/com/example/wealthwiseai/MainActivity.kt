@@ -23,6 +23,7 @@ import com.example.wealthwiseai.ui.navigation.Screen
 import com.example.wealthwiseai.ui.screens.*
 import com.example.wealthwiseai.ui.theme.BlueAccent
 import com.example.wealthwiseai.ui.theme.WealthWiseAITheme
+import com.example.wealthwiseai.ui.theme.ThemeStyle
 import com.example.wealthwiseai.viewmodel.*
 import kotlinx.coroutines.launch
 import com.example.wealthwiseai.data.firebase.FirebaseSyncHelper
@@ -34,8 +35,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settingsViewModel: SettingsViewModel = viewModel()
             val isDarkMode by settingsViewModel.isDarkMode.collectAsState()
+            val themeStyle by settingsViewModel.themeStyle.collectAsState()
 
-            WealthWiseAITheme(darkTheme = isDarkMode) {
+            WealthWiseAITheme(darkTheme = isDarkMode, themeStyle = themeStyle) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

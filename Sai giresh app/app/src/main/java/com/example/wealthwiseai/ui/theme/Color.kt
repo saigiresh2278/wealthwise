@@ -15,7 +15,9 @@ val Pink40 = Color(0xFF7D5260)
 // Premium Fintech Palette (Dark Mode First)
 val DarkBg = Color(0xFF0A0F1D)        // Deep slate black
 val GlassWhite = Color(0x14FFFFFF)     // 8% opacity white for glassmorphism
-val BlueAccent = Color(0xFF3F8CFF)     // Vibrant electric blue
+val BlueAccent: Color
+    @Composable
+    get() = MaterialTheme.colorScheme.primary
 val GreenAccent = Color(0xFF00E676)    // Glowing green for growth
 val GoldAccent = Color(0xFFFFB300)     // Warm amber for goals and risk
 val RedAccent = Color(0xFFFF3D00)      // Hot orange-red for leaks & expenses

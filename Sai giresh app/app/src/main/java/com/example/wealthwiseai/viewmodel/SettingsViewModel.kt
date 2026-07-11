@@ -9,6 +9,7 @@ import com.example.wealthwiseai.data.local.SessionManager
 import com.example.wealthwiseai.data.local.entity.UserProfileEntity
 import com.example.wealthwiseai.data.repository.UserRepository
 import com.example.wealthwiseai.data.firebase.FirebaseSyncHelper
+import com.example.wealthwiseai.ui.theme.ThemeStyle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,6 +32,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val sharedPrefs = application.getSharedPreferences("wealthwise_prefs", Context.MODE_PRIVATE)
     private val _isDarkMode = MutableStateFlow(sharedPrefs.getBoolean("dark_mode", true))
     val isDarkMode: StateFlow<Boolean> = _isDarkMode
+
+    private val _themeStyle = MutableStateFlow(
+        ThemeStyle.valueOf(sharedPrefs.getString("theme_style", ThemeStyle.CLASSIC_BLUE.name) ?: ThemeStyle.CLASSIC_BLUE.name)
+    )
+    val themeStyle: StateFlow<ThemeStyle> = _themeStyle
 
     private val _profilePhotoUri = MutableStateFlow(sharedPrefs.getString("profile_photo_uri", null))
     val profilePhotoUri: StateFlow<String?> = _profilePhotoUri
@@ -94,6 +100,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setDarkMode(enabled: Boolean) {
         sharedPrefs.edit().putBoolean("dark_mode", enabled).apply()
         _isDarkMode.value = enabled
+    }
+
+    fun setThemeStyle(style: ThemeStyle) {
+        sharedPrefs.edit().putString("theme_style", style.name).apply()
+        _themeStyle.value = style
     }
 
     fun resetAllData() {

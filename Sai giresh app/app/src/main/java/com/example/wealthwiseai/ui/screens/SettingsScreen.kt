@@ -2,15 +2,21 @@ package com.example.wealthwiseai.ui.screens
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -33,6 +39,7 @@ fun SettingsScreen(
 ) {
     val userProfile by viewModel.userProfile.collectAsState()
     val isDarkMode by viewModel.isDarkMode.collectAsState()
+    val currentThemeStyle by viewModel.themeStyle.collectAsState()
 
     var showResetDialog by remember { mutableStateOf(false) }
     var showEditProfileDialog by remember { mutableStateOf(false) }
@@ -131,6 +138,69 @@ fun SettingsScreen(
                     )
                 }
             }
+
+            // Inbuilt Themes Selector Card
+            Card(
+                colors = CardDefaults.cardColors(containerColor = CardBg),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Column {
+                        Text("App Theme Accent", fontWeight = FontWeight.Bold, color = TextWhite, fontSize = 15.sp)
+                        Text("Selected: ${currentThemeStyle.displayName}", fontSize = 11.sp, color = TextGray)
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ThemeStyle.values().forEach { style ->
+                            val color = when (style) {
+                                ThemeStyle.CLASSIC_BLUE -> Color(0xFF3F8CFF)
+                                ThemeStyle.EMERALD_GREEN -> Color(0xFF00C853)
+                                ThemeStyle.ROYAL_PURPLE -> Color(0xFF8B5CF6)
+                                ThemeStyle.GOLDEN_LUXURY -> Color(0xFFFFB300)
+                                ThemeStyle.CRIMSON_WARM -> Color(0xFFEF4444)
+                            }
+                            
+                            val isSelected = style == currentThemeStyle
+                            
+                            Box(
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .clip(CircleShape)
+                                    .background(color)
+                                    .clickable { viewModel.setThemeStyle(style) }
+                                    .border(
+                                        width = if (isSelected) 3.dp else 1.dp,
+                                        color = if (isSelected) Color.White else Color.White.copy(alpha = 0.15f),
+                                        shape = CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (isSelected) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "Selected",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
 
             // Edit Profile Card
             Card(
