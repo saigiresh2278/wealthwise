@@ -1,5 +1,9 @@
 package com.example.wealthwiseai.ui.screens
 
+import android.accounts.AccountManager
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -15,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -47,6 +52,20 @@ fun LoginScreen(
     var showCustomEmailInput by remember { mutableStateOf(false) }
     var customEmail by remember { mutableStateOf("") }
     var customName by remember { mutableStateOf("") }
+
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val accountName = result.data?.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
+            if (!accountName.isNullOrEmpty()) {
+                val displayName = accountName.substringBefore("@")
+                    .split(".", "_", "-")
+                    .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
+                viewModel.loginWithGoogle(accountName, displayName)
+            }
+        }
+    }
 
     val loginState by viewModel.loginState.collectAsState()
 
@@ -222,7 +241,22 @@ fun LoginScreen(
 
             // Google Sign-In Button
             OutlinedButton(
-                onClick = { showGoogleAccountPicker = true },
+                onClick = {
+                    try {
+                        val intent = AccountManager.newChooseAccountIntent(
+                            null,
+                            null,
+                            arrayOf("com.google"),
+                            null,
+                            null,
+                            null,
+                            null
+                        )
+                        googleSignInLauncher.launch(intent)
+                    } catch (e: Exception) {
+                        showGoogleAccountPicker = true
+                    }
+                },
                 modifier = Modifier.fillMaxWidth().height(48.dp),
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
