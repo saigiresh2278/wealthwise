@@ -69,3 +69,10 @@ jobs:
         with:
           name: Selenium-E2E-Test-Cases
           path: "Sai giresh app/frontend/selenium-tests/WealthWise_E2E_Test_Cases.xlsx"
+
+      - name: Upload Load Test Excel Report Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: WealthWise-Load-Test-Report
+          path: "Sai giresh app/backend/reports/WealthWise_LoadTest_Report_*.xlsx"
