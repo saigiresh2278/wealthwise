@@ -80,7 +80,7 @@ fun RiskAnalyzerScreen(
                         text = question.question,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = TextWhite,
                         modifier = Modifier.padding(bottom = 20.dp)
                     )
 
@@ -99,11 +99,11 @@ fun RiskAnalyzerScreen(
                                         showResults = true
                                     }
                                 }
-                                .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                                .border(1.dp, TextWhite.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
                         ) {
                             Text(
                                 text = option,
-                                color = Color.White,
+                                color = TextWhite,
                                 fontSize = 14.sp,
                                 modifier = Modifier.padding(16.dp)
                             )
@@ -188,7 +188,7 @@ fun RiskAnalyzerScreen(
                             Text(
                                 text = result.explanation,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White,
+                                color = TextWhite,
                                 textAlign = TextAlign.Center,
                                 lineHeight = 20.sp
                             )
@@ -201,7 +201,7 @@ fun RiskAnalyzerScreen(
                         text = "Recommended Learning Path",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
-                        color = Color.White,
+                        color = TextWhite,
                         modifier = Modifier.align(Alignment.Start)
                     )
 
