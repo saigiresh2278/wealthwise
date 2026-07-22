@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Compilation output
+dist/
+
+# Local env files
+.env
+.env.local
+.env.*.local
+
+# Firebase Service Account Key
+serviceAccountKey.json
+*.json
+
+# Exceptions to json ignore
+!package.json
+!tsconfig.json

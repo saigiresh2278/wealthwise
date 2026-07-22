@@ -133,7 +133,7 @@ export function clearAll(): void {
    BACKEND SERVER SYNC HELPER FUNCTIONS
    ========================================================================== */
 
-const BACKEND_URL = "http://localhost:5000/api"
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
 
 export async function syncAuthUserToFirebase(user: User) {
   try {
